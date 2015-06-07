@@ -48,29 +48,29 @@ def trigger_call(recipients):
 
 
 def check_uptimes():
-    self.response.headers['Content-Type'] = 'text/plain'
     res = get_uptime_status()
-    self.response.write("%d sites being monitored\n" % res['total'])
+    print "%d sites being monitored\n" % res['total']
     if res['down'] != 0:
-        self.response.write("Everybody panic!\n")
+        print "Everybody panic!\n"
         for site in res['downsites']:
-            self.response.write("%s is down.\n" % site)
-        trigger_call(CALLEES)
+            print "%s is down.\n" % site
+        trigger_call(CALLEES, res)
     else:
-        self.response.write("Everything seems fine\n")
+        print "Everything seems fine\n"
 
 
 def downtime_message(uptime_status):
-    self.response.headers['Content-Type'] = "text/xml"
+    response = ""
     res = get_uptime_status()
     if res['down'] != 0:
-        self.response.write("""<?xml version="1.0" encoding="UTF-8"?>
+        response = """<?xml version="1.0" encoding="UTF-8"?>
         <Response>
             <Say voice="alice">Everyone panic! %s</Say>
-        </Response>""" % " ".join(map(lambda s: ("%s is down." % s.replace("doublemap", "double map")), res['downsites'])))
+        </Response>""" % " ".join(map(lambda s: ("%s is down." % s.replace("doublemap", "double map")), res['downsites']))
     else:
-        self.response.write("""<?xml version="1.0" encoding="UTF-8"?>
+        response = """<?xml version="1.0" encoding="UTF-8"?>
         <Response>
             <Say voice="alice">False alarm. %d of %d sites are down.</Say>
-        </Response>""" % (res['down'], res['total']))
+        </Response>""" % (res['down'], res['total'])
+    return response
 
