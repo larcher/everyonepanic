@@ -16,18 +16,6 @@ CALLEES = os.environ['CALLEES'].split(',')
 UPTIME_ROBOT_KEY = os.environ['UPTIME_ROBOT_KEY']
 UPTIME_ROBOT = "http://api.uptimerobot.com/getMonitors?apiKey=" + UPTIME_ROBOT_KEY + "&format=json&noJsonCallback=1"
 
-# what's our app name?
-APP_HOSTNAME = "YOUR_APP_HERE.appspot.com"
-if 'APP_HOSTNAME' in os.environ:  # try environment
-    APP_HOSTNAME = os.environ['APP_HOSTNAME']
-else:  # try getting it from app engine
-    try:
-        from google.appengine.api.app_identity import get_application_id
-        APP_HOSTNAME = get_application_id() + ".appspot.com"
-    except ImportError:
-        pass
-
-
 def get_uptime_status():
     with contextlib.closing(urllib2.urlopen(UPTIME_ROBOT)) as ustream:
         resp = json.load(ustream)
@@ -38,7 +26,6 @@ def get_uptime_status():
         if m['status'] == "9":  # 9 == "Down", 8 == "Seems down"
             downsites.append(m['friendlyname'])
     return {"total": len(resp['monitors']['monitor']), "down": len(downsites), "downsites": downsites}
-
 
 def trigger_call(recipients):
     client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
