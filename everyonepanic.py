@@ -16,6 +16,8 @@ CALLEES = os.environ['CALLEES'].split(',')
 UPTIME_ROBOT_KEY = os.environ['UPTIME_ROBOT_KEY']
 UPTIME_ROBOT = "http://api.uptimerobot.com/getMonitors?apiKey=" + UPTIME_ROBOT_KEY + "&format=json&noJsonCallback=1"
 
+TWILIO_TWIML_ECHO = 'http://twimlets.com/echo?Twiml='
+
 def get_uptime_status():
     with contextlib.closing(urllib2.urlopen(UPTIME_ROBOT)) as ustream:
         resp = json.load(ustream)
@@ -27,11 +29,14 @@ def get_uptime_status():
             downsites.append(m['friendlyname'])
     return {"total": len(resp['monitors']['monitor']), "down": len(downsites), "downsites": downsites}
 
-def trigger_call(recipients):
+def trigger_call(recipients, uptime_status=None):
+    if uptime_status is None:
+        uptime_status = get_uptime_status()
     client = TwilioRestClient(TWILIO_SID, TWILIO_TOKEN)
     for recp in recipients:
-        call = client.calls.create(url=("http://%s/downmessage" % APP_HOSTNAME),
-            to=recp, from_=TWILIO_FROM)
+        twiml = downtime_message(uptime_status)
+        twimlet_echo_url = TWILIO_TWIML_ECHO + urllib2.quote(twiml)
+        call = client.calls.create(url=twimlet_echo_url, to=recp, from_=TWILIO_FROM)
 
 
 def check_uptimes():
