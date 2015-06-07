@@ -26,8 +26,6 @@ Configuration
 
 You need to set a few different environment variables:
 
-* `application` - change "my_app_name" to your App Engine name
-* `APP_HOSTNAME` - required for Heroku, tries to detect it on App Engine
 * `TWILIO_SID` - find this in your Twilio account
 * `TWILIO_TOKEN` - also find this in your Twilio account
 * `TWILIO_FROM` - a Twilio purchased or validated phone number
