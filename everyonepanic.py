@@ -2,7 +2,6 @@ import contextlib
 import json
 import os
 import urllib2
-import webapp2
 from twilio.rest import TwilioRestClient
 
 # Calls you when your sites go down.
@@ -29,12 +28,6 @@ else:  # try getting it from app engine
         pass
 
 
-class MainPage(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.write('Hi, this thing will call you if uptime robot reports down sites.')
-
-
 def get_uptime_status():
     with contextlib.closing(urllib2.urlopen(UPTIME_ROBOT)) as ustream:
         resp = json.load(ustream)
@@ -54,38 +47,30 @@ def trigger_call(recipients):
             to=recp, from_=TWILIO_FROM)
 
 
-class CheckUptimes(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        res = get_uptime_status()
-        self.response.write("%d sites being monitored\n" % res['total'])
-        if res['down'] != 0:
-            self.response.write("Everybody panic!\n")
-            for site in res['downsites']:
-                self.response.write("%s is down.\n" % site)
-            trigger_call(CALLEES)
-        else:
-            self.response.write("Everything seems fine\n")
+def check_uptimes():
+    self.response.headers['Content-Type'] = 'text/plain'
+    res = get_uptime_status()
+    self.response.write("%d sites being monitored\n" % res['total'])
+    if res['down'] != 0:
+        self.response.write("Everybody panic!\n")
+        for site in res['downsites']:
+            self.response.write("%s is down.\n" % site)
+        trigger_call(CALLEES)
+    else:
+        self.response.write("Everything seems fine\n")
 
 
-class DowntimeMessage(webapp2.RequestHandler):
-    def post(self):
-        self.response.headers['Content-Type'] = "text/xml"
-        res = get_uptime_status()
-        if res['down'] != 0:
-            self.response.write("""<?xml version="1.0" encoding="UTF-8"?>
-            <Response>
-                <Say voice="alice">Everyone panic! %s</Say>
-            </Response>""" % " ".join(map(lambda s: ("%s is down." % s.replace("doublemap", "double map")), res['downsites'])))
-        else:
-            self.response.write("""<?xml version="1.0" encoding="UTF-8"?>
-            <Response>
-                <Say voice="alice">False alarm. %d of %d sites are down.</Say>
-            </Response>""" % (res['down'], res['total']))
+def downtime_message(uptime_status):
+    self.response.headers['Content-Type'] = "text/xml"
+    res = get_uptime_status()
+    if res['down'] != 0:
+        self.response.write("""<?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+            <Say voice="alice">Everyone panic! %s</Say>
+        </Response>""" % " ".join(map(lambda s: ("%s is down." % s.replace("doublemap", "double map")), res['downsites'])))
+    else:
+        self.response.write("""<?xml version="1.0" encoding="UTF-8"?>
+        <Response>
+            <Say voice="alice">False alarm. %d of %d sites are down.</Say>
+        </Response>""" % (res['down'], res['total']))
 
-
-application = webapp2.WSGIApplication([
-    ('/', MainPage),
-    ('/checksites', CheckUptimes),
-    ('/downmessage', DowntimeMessage),
-], debug=True)
