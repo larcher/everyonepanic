@@ -50,9 +50,8 @@ def check_uptimes():
     else:
         print "Everything seems fine\n"
 
-
 def downtime_message(uptime_status=None):
-    response = ""
+    response = None
     if uptime_status is None:
         uptime_status = get_uptime_status()
     if uptime_status['down'] != 0:
@@ -67,3 +66,5 @@ def downtime_message(uptime_status=None):
         </Response>""" % (uptime_status['down'], uptime_status['total'])
     return response
 
+if __name__ == "__main__":
+    check_uptimes()
