@@ -11,8 +11,10 @@ rate ($0.02 per call per callee in the USA).
 
 It should be easy to set up as a cronjob on a server that runs Python and talks
 to the Internet.  Obviously, you should use a hosting platform that isn't also
-used for your sites. (If you want something that can run on AppEngine or
-Heroku, see the original project.)
+used for your sites. If you want something that can run on AppEngine or
+Heroku, see the [original project](https://github.com/doublemap/everyonepanic).
+
+This script uses [the Echo Twimlet from Twilio Labs](https://www.twilio.com/labs/twimlets/echo) to provide a TwiML endpoint for the Twilio API to use. This allows Everyone Panic to run as a standalone script instead of a web app.
 
 It's the closest thing we've had to a "set it and forget it" service, since we
 don't need to touch it in order to add additional sites in Uptime Robot. This
@@ -33,14 +35,16 @@ You need to set a few different environment variables:
 `+15551111111,+15552222222`
 * `UPTIME_ROBOT_KEY` - your Uptime Robot account's API key
 
+Setup
+-----
+
+ * `git clone`
+ * `cd everyonepanic`
+ * `mkvirtualenv everyonepanic -r requirements.txt`
+ * ...
 
 Cron job
 --------
 
 ...
 
-
-Deployment
-----------
-
-...
