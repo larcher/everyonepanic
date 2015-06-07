@@ -51,18 +51,19 @@ def check_uptimes():
         print "Everything seems fine\n"
 
 
-def downtime_message(uptime_status):
+def downtime_message(uptime_status=None):
     response = ""
-    res = get_uptime_status()
-    if res['down'] != 0:
+    if uptime_status is None:
+        uptime_status = get_uptime_status()
+    if uptime_status['down'] != 0:
         response = """<?xml version="1.0" encoding="UTF-8"?>
         <Response>
             <Say voice="alice">Everyone panic! %s</Say>
-        </Response>""" % " ".join(map(lambda s: ("%s is down." % s.replace("doublemap", "double map")), res['downsites']))
+        </Response>""" % " ".join(map(lambda s: ("%s is down." % s.replace("doublemap", "double map")), uptime_status['downsites']))
     else:
         response = """<?xml version="1.0" encoding="UTF-8"?>
         <Response>
             <Say voice="alice">False alarm. %d of %d sites are down.</Say>
-        </Response>""" % (res['down'], res['total'])
+        </Response>""" % (uptime_status['down'], uptime_status['total'])
     return response
 
